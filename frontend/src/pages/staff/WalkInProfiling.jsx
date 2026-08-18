@@ -1,235 +1,157 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState } from 'react';
 import api from '../../api/axios';
 import Alert from '../../components/ui/Alert';
-import { UserPlus, UserCheck, HeartPulse, MapPin, CreditCard, CheckCircle } from 'lucide-react';
+import { UserPlus, CheckCircle } from 'lucide-react';
 
 const WalkInProfiling = () => {
-  const { user } = useAuth();
   const [alert, setAlert] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(null); // holds { message, name, username, email, password }
 
-  // Data fetching
-  const [plots, setPlots] = useState([]);
-
-  // Form State
-  
-  const [customerData, setCustomerData] = useState({
-    first_name: '', last_name: '', username: '', email: '', phone: ''
-  });
-  const [deceasedData, setDeceasedData] = useState({
-    deceased_name: '', date_of_birth: '', date_of_death: '', cause_of_death: ''
-  });
-  const [reservationData, setReservationData] = useState({
-    plot_id: '', intended_use_date: '', payment_type: 'Down Payment', amount_paid: ''
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    phone: '',
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const plotRes = await api.get('/plots', { params: { status: 'Available' } });
-        setPlots(plotRes.data);
-      } catch (err) {
-        setAlert({ type: 'danger', message: 'Failed to load plots.' });
-      }
-    };
-    fetchData();
-  }, []);
-
-  const selectedPlot = plots.find(p => p.plot_id === parseInt(reservationData.plot_id));
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setAlert({ type: '', message: '' });
 
-    if (reservationData.payment_type === 'Full Payment' && selectedPlot) {
-      if (parseFloat(reservationData.amount_paid) !== parseFloat(selectedPlot.price)) {
-        setAlert({ type: 'danger', message: `Full payment must be exactly ₱${selectedPlot.price.toLocaleString()}` });
-        setLoading(false);
-        return;
-      }
-    }
-
     try {
-      const payload = {
-        staff_id: user.user_id,
-        is_new_customer: true,
-        customer_id: null,
-        customer_data: customerData,
-        deceased_data: deceasedData,
-        plot_id: parseInt(reservationData.plot_id),
-        intended_use_date: reservationData.intended_use_date,
-        payment_type: reservationData.payment_type,
-        amount_paid: parseFloat(reservationData.amount_paid)
-      };
-
-      await api.post('/walk-in', payload);
-      setSuccess(true);
+      const res = await api.post('/users/customer', formData);
+      const autoPassword = `${formData.first_name.trim().toLowerCase()}123`;
+      setSuccess({
+        name: `${formData.first_name} ${formData.last_name}`,
+        username: res.data.username,
+        email: res.data.email,
+        password: autoPassword,
+        message: res.data.message,
+      });
     } catch (err) {
-      setAlert({ type: 'danger', message: err.response?.data?.error || 'Transaction failed.' });
+      setAlert({ type: 'danger', message: err.response?.data?.error || 'Failed to create account.' });
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
-    setSuccess(false);
-    setStep(1);
-    setCustomerData({ first_name: '', last_name: '', username: '', email: '', phone: '' });
-    setDeceasedData({ deceased_name: '', date_of_birth: '', date_of_death: '', cause_of_death: '' });
-    setReservationData({ plot_id: '', intended_use_date: '', payment_type: 'Down Payment', amount_paid: '' });
-    
-    // Refresh plots
-    api.get('/plots', { params: { status: 'Available' } }).then(r => setPlots(r.data));
+    setSuccess(null);
+    setFormData({ first_name: '', last_name: '', phone: '' });
+    setAlert({ type: '', message: '' });
   };
 
   if (success) {
     return (
-      <div className="card text-center" style={{ padding: '4rem 2rem' }}>
-        <CheckCircle size={64} style={{ color: 'var(--success)', margin: '0 auto 1.5rem' }} />
-        <h2 className="mb-2">Transaction Complete!</h2>
-        <p className="mb-6" style={{ color: 'var(--text-muted)' }}>
-          The customer profile, deceased record, reservation, and payment have all been successfully processed.
-        </p>
-        <button className="btn btn-primary" onClick={resetForm}>Start New Walk-in</button>
+      <div>
+        <h1 className="mb-4">Profiling</h1>
+        <div className="card" style={{ maxWidth: '600px', textAlign: 'center', padding: '3rem 2rem' }}>
+          <CheckCircle size={56} style={{ color: 'var(--success)', margin: '0 auto 1.5rem' }} />
+          <h2 style={{ marginBottom: '0.5rem' }}>Account Profiled!</h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
+            The customer profile is pending Admin approval.
+          </p>
+
+          {/* Credentials Summary */}
+          <div style={{
+            background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)',
+            borderRadius: 'var(--radius-md)', padding: '1.25rem', marginBottom: '2rem',
+            textAlign: 'left',
+          }}>
+            <p style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+              Auto-Generated Profile Summary
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem' }}>
+              <div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0 0 0.25rem' }}>Name</p>
+                <p style={{ fontWeight: 600, margin: 0 }}>{success.name}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0 0 0.25rem' }}>Auto Username</p>
+                <p style={{ fontWeight: 600, margin: 0 }}>{success.username}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0 0 0.25rem' }}>Auto Email</p>
+                <p style={{ fontWeight: 600, margin: 0 }}>{success.email}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0 0 0.25rem' }}>Default Password</p>
+                <p style={{ fontWeight: 700, margin: 0, color: 'var(--primary)', fontFamily: 'monospace', fontSize: '1rem' }}>{success.password}</p>
+              </div>
+            </div>
+          </div>
+
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+            ⚠️ Once Admin approves this profiling, full profile details will be confirmed.
+          </p>
+          <button className="btn btn-primary" onClick={resetForm}>
+            <UserPlus size={18} /> Create Another Account
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="mb-4">Walk-in Profiling</h1>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ marginBottom: '0.25rem' }}>Profiling</h1>
+        <p style={{ color: 'var(--text-muted)', margin: 0 }}>
+          Create a new customer profile. Username and email will be auto-generated base on the customer's name.
+        </p>
+      </div>
+
       <Alert type={alert.type} message={alert.message} />
 
-      <div className="card">
-        {/* Stepper */}
-        <div className="flex justify-between mb-6 border-b" style={{ borderColor: 'var(--border-color)', paddingBottom: '1rem' }}>
-          {[
-            { num: 1, label: 'Deceased Info', icon: HeartPulse },
-            { num: 2, label: 'Plot Selection', icon: MapPin },
-            { num: 3, label: 'Payment', icon: CreditCard },
-            { num: 4, label: 'Customer Account', icon: UserPlus }
-          ].map((s) => (
-            <div key={s.num} className="flex flex-col items-center gap-2" style={{ flex: 1, color: step >= s.num ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: step >= s.num ? 'rgba(59,130,246,0.1)' : 'var(--background-alt)',
-                border: `2px solid ${step >= s.num ? 'var(--primary)' : 'transparent'}`
-              }}>
-                <s.icon size={20} />
-              </div>
-              <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{s.label}</span>
-            </div>
-          ))}
+      <div className="card" style={{ maxWidth: '600px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--border-light)' }}>
+          <div style={{ padding: '0.625rem', background: 'var(--primary-glow)', borderRadius: 'var(--radius-md)', color: 'var(--primary)' }}>
+            <UserPlus size={22} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0 }}>New Customer Profiling</h3>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Account defaults to Pending until Admin approves</p>
+          </div>
         </div>
 
-        <form onSubmit={step === 4 ? handleSubmit : (e) => { e.preventDefault(); setStep(step + 1); }}>
-          
-          {/* STEP 1: DECEASED */}
-          {step === 1 && (
-            <div className="animate-fade-in">
-              <h3 className="mb-4">Deceased Information</h3>
-              <div className="grid grid-cols-2">
-                <div className="form-group"><label className="form-label">Full Name</label><input type="text" className="form-control" required value={deceasedData.deceased_name} onChange={e=>setDeceasedData({...deceasedData, deceased_name: e.target.value})} /></div>
-                <div className="form-group"><label className="form-label">Cause of Death</label><input type="text" className="form-control" value={deceasedData.cause_of_death} onChange={e=>setDeceasedData({...deceasedData, cause_of_death: e.target.value})} /></div>
-                <div className="form-group"><label className="form-label">Date of Birth</label><input type="date" className="form-control" required value={deceasedData.date_of_birth} onChange={e=>setDeceasedData({...deceasedData, date_of_birth: e.target.value})} /></div>
-                <div className="form-group"><label className="form-label">Date of Death</label><input type="date" className="form-control" required value={deceasedData.date_of_death} onChange={e=>setDeceasedData({...deceasedData, date_of_death: e.target.value})} /></div>
-              </div>
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2">
+            <div className="form-group">
+              <label className="form-label">First Name</label>
+              <input name="first_name" type="text" className="form-control" required value={formData.first_name} onChange={handleChange} placeholder="Juan" />
             </div>
-          )}
-
-          {/* STEP 2: PLOT */}
-          {step === 2 && (
-            <div className="animate-fade-in">
-              <h3 className="mb-4">Plot Selection</h3>
-              <div className="form-group">
-                <label className="form-label">Available Plots</label>
-                <select className="form-control" required value={reservationData.plot_id} onChange={e => setReservationData({...reservationData, plot_id: e.target.value})}>
-                  <option value="">Select a plot...</option>
-                  {plots.map(p => (
-                    <option key={p.plot_id} value={p.plot_id}>
-                      {p.plot_number} ({p.plot_type}) — ₱{parseFloat(p.price).toLocaleString()}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {selectedPlot && (
-                <div className="card mb-4" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid var(--success)' }}>
-                  <h4 style={{ margin: 0, color: 'var(--success)' }}>Selected Plot Details</h4>
-                  <p style={{ margin: '0.5rem 0 0 0' }}>Plot: <strong>{selectedPlot.plot_number}</strong></p>
-                  <p style={{ margin: 0 }}>Type: <strong>{selectedPlot.plot_type}</strong></p>
-                  <p style={{ margin: 0 }}>Price: <strong>₱{parseFloat(selectedPlot.price).toLocaleString()}</strong></p>
-                </div>
-              )}
+            <div className="form-group">
+              <label className="form-label">Last Name</label>
+              <input name="last_name" type="text" className="form-control" required value={formData.last_name} onChange={handleChange} placeholder="dela Cruz" />
             </div>
-          )}
-
-          {/* STEP 3: PAYMENT */}
-          {step === 3 && (
-            <div className="animate-fade-in">
-              <h3 className="mb-4">Schedule & Payment</h3>
-              
-              <div className="form-group">
-                <label className="form-label">Intended Interment Date</label>
-                <input type="date" className="form-control" required value={reservationData.intended_use_date} onChange={e => setReservationData({...reservationData, intended_use_date: e.target.value})} />
-              </div>
-
-              <div className="grid grid-cols-2">
-                <div className="form-group">
-                  <label className="form-label">Payment Type</label>
-                  <select className="form-control" required value={reservationData.payment_type} onChange={e => {
-                    const type = e.target.value;
-                    const amount = (type === 'Full Payment' && selectedPlot) ? selectedPlot.price : reservationData.amount_paid;
-                    setReservationData({...reservationData, payment_type: type, amount_paid: amount});
-                  }}>
-                    <option>Down Payment</option>
-                    <option>Full Payment</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Amount Paid (₱)</label>
-                  <input type="number" step="0.01" className="form-control" required 
-                    value={reservationData.amount_paid} 
-                    onChange={e => setReservationData({...reservationData, amount_paid: e.target.value})}
-                    readOnly={reservationData.payment_type === 'Full Payment'} 
-                  />
-                </div>
-              </div>
-
-              {selectedPlot && (
-                <div className="flex justify-between items-center mb-6" style={{ padding: '1rem', background: 'var(--background-alt)', borderRadius: '0.5rem' }}>
-                  <span style={{ fontWeight: 600 }}>Total Plot Price:</span>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>₱{parseFloat(selectedPlot.price).toLocaleString()}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* STEP 4: CUSTOMER */}
-          {step === 4 && (
-            <div className="animate-fade-in">
-              <h3 className="mb-4">Customer Information & Account Creation</h3>
-              <div className="grid grid-cols-2">
-                <div className="form-group"><label className="form-label">First Name</label><input type="text" className="form-control" required value={customerData.first_name} onChange={e=>setCustomerData({...customerData, first_name: e.target.value})} /></div>
-                <div className="form-group"><label className="form-label">Last Name</label><input type="text" className="form-control" required value={customerData.last_name} onChange={e=>setCustomerData({...customerData, last_name: e.target.value})} /></div>
-                <div className="form-group"><label className="form-label">Username</label><input type="text" className="form-control" required value={customerData.username} onChange={e=>setCustomerData({...customerData, username: e.target.value})} /></div>
-                <div className="form-group"><label className="form-label">Email</label><input type="email" className="form-control" value={customerData.email} onChange={e=>setCustomerData({...customerData, email: e.target.value})} /></div>
-                <div className="form-group"><label className="form-label">Phone</label><input type="text" className="form-control" value={customerData.phone} onChange={e=>setCustomerData({...customerData, phone: e.target.value})} /></div>
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-between mt-6">
-            <button type="button" className="btn btn-secondary" onClick={() => setStep(step - 1)} disabled={step === 1 || loading}>
-              Back
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Processing...' : step === 4 ? 'Complete Transaction' : 'Next Step'}
-            </button>
           </div>
+
+          <div className="form-group">
+            <label className="form-label">Phone Number <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span></label>
+            <input name="phone" type="tel" className="form-control" value={formData.phone} onChange={handleChange} placeholder="09123456789" />
+          </div>
+
+          <div style={{
+            padding: '0.875rem 1rem', borderRadius: 'var(--radius-md)',
+            background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)',
+            marginBottom: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)',
+          }}>
+            ℹ️ <strong>Auto-Generated Account Details:</strong><br />
+            • Username &amp; Email will be auto-generated based on the customer's name.<br />
+            • Default password will be: <strong style={{ color: 'var(--primary)' }}>
+              {formData.first_name ? `${formData.first_name.trim().toLowerCase()}123` : 'firstname123'}
+            </strong>
+          </div>
+
+          <button type="submit" className="btn btn-primary w-full" disabled={loading}
+            style={{ width: '100%', padding: '0.875rem', fontSize: '1rem' }}>
+            {loading ? 'Creating Account Profile…' : 'Create Customer Account'}
+          </button>
         </form>
       </div>
     </div>

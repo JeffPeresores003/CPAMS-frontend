@@ -27,7 +27,7 @@ const Reservations = () => {
     setLoading(true);
     try {
       const [resRes, plotRes, custRes] = await Promise.all([
-        api.get('/reservations'),
+        api.get('/reservations', { params: { reservation_status: 'Accepted' } }),
         api.get('/plots', { params: { status: 'Available' } }),
         api.get('/users', { params: { role: 'Customer', status: 'Approved' } }),
       ]);
@@ -105,6 +105,7 @@ const Reservations = () => {
               <th>Customer</th>
               <th>Plot</th>
               <th>Total Price</th>
+              <th>Remaining Balance</th>
               <th>Intended Use Date</th>
               <th>Balance Status</th>
               <th>Reserved On</th>
@@ -121,6 +122,7 @@ const Reservations = () => {
                     <td>{r.customer_name || r.customer_id}</td>
                     <td>{r.plot_number || r.plot_id}</td>
                     <td>₱{parseFloat(r.total_price).toLocaleString()}</td>
+                    <td style={{ fontWeight: 600, color: '#f59e0b' }}>₱{parseFloat(r.remaining_balance || 0).toLocaleString()}</td>
                     <td>{r.intended_use_date ? new Date(r.intended_use_date).toLocaleDateString() : '—'}</td>
                     <td><StatusBadge value={r.balance_status} /></td>
                     <td>{new Date(r.reservation_date).toLocaleDateString()}</td>

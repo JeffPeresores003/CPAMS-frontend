@@ -9,11 +9,6 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // If user hasn't changed password and isn't currently on the change-password page
-  if (user.is_first_login && window.location.pathname !== '/change-password') {
-    return <Navigate to="/change-password" replace />;
-  }
-
   return <Outlet />;
 };
 

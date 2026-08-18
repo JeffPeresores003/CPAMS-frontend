@@ -75,7 +75,45 @@ const Dashboard = () => {
 
   return (
     <div>
-      <h1 className="mb-4">Welcome back, {user?.first_name}!</h1>
+      {/* ── Dashboard Hero Banner ── */}
+      <div style={{
+        position: 'relative',
+        borderRadius: 'var(--radius-lg)',
+        overflow: 'hidden',
+        padding: '2.5rem 2rem',
+        marginBottom: '2rem',
+        border: '1px solid var(--border-light)',
+        boxShadow: 'var(--shadow-md)',
+      }}>
+        {/* Background Image */}
+        <img 
+          src="public/img/cross.png" 
+          alt="Peaceful nature landscape"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover',
+            filter: 'brightness(0.5) saturate(0.9)',
+          }}
+        />
+        {/* Gradient Overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to right, rgba(9,9,11,0.9) 0%, rgba(9,9,11,0.4) 50%, transparent 100%)',
+        }} />
+        
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <h1 style={{ margin: 0, fontSize: '2.25rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>
+            Welcome back, {user?.first_name}!
+          </h1>
+          <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', fontSize: '1rem', maxWidth: '500px', lineHeight: 1.5 }}>
+            {user?.role === 'Customer' 
+              ? 'Manage your plot reservations, view payment history, and keep track of records for your loved ones.' 
+              : 'Here is what is happening at the cemetery today. View recent activities, occupancy stats, and revenue.'}
+          </p>
+        </div>
+      </div>
 
       {(user?.role === 'Admin' || user?.role === 'Staff') ? (
         <>

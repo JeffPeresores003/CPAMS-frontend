@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Eye } from 'lucide-react';
+import Modal from '../../components/ui/Modal';
+
+const getAccountCode = (u) => {
+  if (!u) return '—';
+  if (u.account_code) return u.account_code;
+  const prefix = u.role === 'Admin' ? 'ADM' : u.role === 'Staff' ? 'STF' : 'CUS';
+  const year = u.created_at ? new Date(u.created_at).getFullYear() : new Date().getFullYear();
+  const idStr = String(u.user_id || u.account_id || 0).padStart(4, '0');
+  return `${prefix}-${year}-${idStr}`;
+};
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -9,6 +19,7 @@ const UserList = () => {
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showStaffForm, setShowStaffForm] = useState(false);
+  const [selectedUserForProfile, setSelectedUserForProfile] = useState(null);
   const { user } = useAuth();
   
   const [staffForm, setStaffForm] = useState({
@@ -21,7 +32,10 @@ const UserList = () => {
       const res = await api.get('/users', {
         params: { role: roleFilter, status: statusFilter }
       });
-      setUsers(res.data);
+      
+      // Do not show pending users in the main User Management tab
+      const filteredUsers = res.data.filter(u => u.account_status !== 'Pending');
+      setUsers(filteredUsers);
     } catch (err) {
       console.error(err);
     } finally {
@@ -87,7 +101,6 @@ const UserList = () => {
           >
             <option value="">All Statuses</option>
             <option value="Approved">Approved</option>
-            <option value="Pending">Pending</option>
             <option value="Disabled">Disabled</option>
             <option value="Rejected">Rejected</option>
           </select>
@@ -119,8 +132,10 @@ const UserList = () => {
           <table>
             <thead>
               <tr>
+                <th>Account Code</th>
                 <th>Name</th>
                 <th>Username</th>
+                <th>Email</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -129,8 +144,14 @@ const UserList = () => {
             <tbody>
               {users.map(u => (
                 <tr key={u.user_id}>
+                  <td>
+                    <span className="badge" style={{ backgroundColor: 'rgba(16,185,129,0.1)', color: 'var(--primary)', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'monospace', letterSpacing: '0.05em', fontWeight: 600 }}>
+                      {getAccountCode(u)}
+                    </span>
+                  </td>
                   <td>{u.first_name} {u.last_name}</td>
                   <td>{u.username}</td>
+                  <td>{u.email}</td>
                   <td>
                     <span className={`badge ${u.role === 'Admin' ? 'badge-danger' : u.role === 'Staff' ? 'badge-info' : 'badge-success'}`}>
                       {u.role}
@@ -142,28 +163,97 @@ const UserList = () => {
                     </span>
                   </td>
                   <td>
-                    {u.user_id !== user.user_id && u.role !== 'Admin' && (
-                      <button 
-                        className={`btn ${u.account_status === 'Approved' ? 'btn-danger' : 'btn-primary'}`}
-                        style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem' }}
-                        onClick={() => toggleStatus(u.user_id, u.account_status)}
-                        disabled={u.account_status === 'Pending' || u.account_status === 'Rejected'}
+                    <div className="flex gap-2">
+                      <button
+                        className="btn btn-secondary"
+                        style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                        onClick={() => setSelectedUserForProfile(u)}
                       >
-                        {u.account_status === 'Approved' ? 'Disable' : 'Enable'}
+                        <Eye size={14} /> Profile
                       </button>
-                    )}
+
+                      {u.user_id !== user.user_id && u.role !== 'Admin' && (
+                        <button 
+                          className={`btn ${u.account_status === 'Approved' ? 'btn-danger' : 'btn-primary'}`}
+                          style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem' }}
+                          onClick={() => toggleStatus(u.user_id, u.account_status)}
+                          disabled={u.account_status === 'Pending' || u.account_status === 'Rejected'}
+                        >
+                          {u.account_status === 'Approved' ? 'Disable' : 'Enable'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="text-center" style={{ padding: '2rem' }}>No users found</td>
+                  <td colSpan="7" className="text-center" style={{ padding: '2rem' }}>No users found</td>
                 </tr>
               )}
             </tbody>
           </table>
         )}
       </div>
+
+      {/* View User Profile Modal */}
+      {selectedUserForProfile && (
+        <Modal 
+          isOpen={true} 
+          onClose={() => setSelectedUserForProfile(null)}
+          title="Full Account Profile"
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Account Code</label>
+                <p style={{ fontWeight: 700, fontFamily: 'monospace', margin: 0, fontSize: '1.1rem', color: 'var(--primary)' }}>
+                  {getAccountCode(selectedUserForProfile)}
+                </p>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Role</label>
+                <div>
+                  <span className={`badge ${selectedUserForProfile.role === 'Admin' ? 'badge-danger' : selectedUserForProfile.role === 'Staff' ? 'badge-info' : 'badge-success'}`}>
+                    {selectedUserForProfile.role}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Full Name</label>
+                <p style={{ fontWeight: 600, margin: 0 }}>{selectedUserForProfile.first_name} {selectedUserForProfile.last_name}</p>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Account Status</label>
+                <div>
+                  <span className={`badge badge-${selectedUserForProfile.account_status.toLowerCase()}`}>
+                    {selectedUserForProfile.account_status}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Username</label>
+                <p style={{ fontWeight: 600, margin: 0 }}>{selectedUserForProfile.username}</p>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Email</label>
+                <p style={{ fontWeight: 600, margin: 0 }}>{selectedUserForProfile.email}</p>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Phone Number</label>
+                <p style={{ fontWeight: 600, margin: 0 }}>{selectedUserForProfile.phone || 'N/A'}</p>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Date Joined</label>
+                <p style={{ fontWeight: 600, margin: 0 }}>{new Date(selectedUserForProfile.created_at).toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex justify-end mt-2">
+              <button className="btn btn-secondary" onClick={() => setSelectedUserForProfile(null)}>Close</button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

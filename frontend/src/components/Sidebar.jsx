@@ -45,18 +45,45 @@ const Sidebar = () => {
       top: 0,
       zIndex: 50
     }}>
-      <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid var(--border-light)' }}>
-        <h2 style={{ margin: 0, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.75rem', letterSpacing: '-0.05em' }}>
-          <div style={{ padding: '0.5rem', background: 'var(--primary-glow)', borderRadius: 'var(--radius-md)', color: 'var(--primary)' }}>
-            <MapIcon size={24} />
-          </div>
-          CPAMS
-        </h2>
-        <p style={{ margin: '1rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-          {user?.first_name} {user?.last_name}
-          <br/>
-          <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '0.05em', fontWeight: 600 }}>{user?.role}</span>
-        </p>
+      <div style={{ 
+        padding: '2rem 1.5rem', 
+        borderBottom: '1px solid var(--border-light)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Sidebar Header Background Image */}
+        <img 
+          src="https://images.unsplash.com/photo-1542224566-6e85f2e6772f?w=400&auto=format&fit=crop&q=80"
+          alt="Sidebar aesthetic"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover',
+            filter: 'brightness(0.3) saturate(0.8)',
+            zIndex: 0
+          }}
+        />
+        {/* Overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(9,9,11,0.6) 0%, rgba(9,9,11,0.95) 100%)',
+          zIndex: 0
+        }} />
+        
+        {/* Header Content */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h2 style={{ margin: 0, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.75rem', letterSpacing: '-0.05em' }}>
+            <div style={{ padding: '0.5rem', background: 'var(--primary-glow)', borderRadius: 'var(--radius-md)', color: 'var(--primary)' }}>
+              <MapIcon size={24} />
+            </div>
+            CPAMS
+          </h2>
+          <p style={{ margin: '1rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+            {user?.first_name} {user?.last_name}
+            <br/>
+            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '0.05em', fontWeight: 600 }}>{user?.role}</span>
+          </p>
+        </div>
       </div>
 
       <nav style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -67,11 +94,14 @@ const Sidebar = () => {
         {user?.role === 'Admin' && (
           <>
             <div style={{ marginTop: '1rem', marginBottom: '0.5rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, paddingLeft: '1rem' }}>Admin</div>
-            <NavLink to="/users" style={({ isActive }) => navItemStyle(isActive)}>
+            <NavLink to="/users" end style={({ isActive }) => navItemStyle(isActive)}>
               <Users size={20} /> User Management
             </NavLink>
             <NavLink to="/users/pending" style={({ isActive }) => navItemStyle(isActive)}>
               <UserMinus size={20} /> Pending Customers
+            </NavLink>
+            <NavLink to="/cemetery" style={({ isActive }) => navItemStyle(isActive)}>
+              <Settings size={20} /> Cemetery Setup
             </NavLink>
             <NavLink to="/reports" style={({ isActive }) => navItemStyle(isActive)}>
               <FileText size={20} /> Reports
@@ -79,11 +109,14 @@ const Sidebar = () => {
           </>
         )}
 
-        {(user?.role === 'Admin' || user?.role === 'Staff') && (
+        {user?.role === 'Staff' && (
           <>
             <div style={{ marginTop: '1rem', marginBottom: '0.5rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, paddingLeft: '1rem' }}>Operations</div>
             <NavLink to="/customers/new" style={({ isActive }) => navItemStyle(isActive)}>
-              <UserPlus size={20} /> Walk-in / Profiling
+              <UserPlus size={20} /> Profiling
+            </NavLink>
+            <NavLink to="/billing" style={({ isActive }) => navItemStyle(isActive)}>
+              <FileText size={20} /> Billing
             </NavLink>
             <NavLink to="/reservations" style={({ isActive }) => navItemStyle(isActive)}>
               <CalendarClock size={20} /> Reservations
@@ -93,9 +126,6 @@ const Sidebar = () => {
             </NavLink>
             <NavLink to="/deceased" style={({ isActive }) => navItemStyle(isActive)}>
               <UserMinus size={20} /> Deceased Records
-            </NavLink>
-            <NavLink to="/cemetery" style={({ isActive }) => navItemStyle(isActive)}>
-              <Settings size={20} /> Cemetery Setup
             </NavLink>
           </>
         )}
@@ -114,6 +144,11 @@ const Sidebar = () => {
             </NavLink>
           </>
         )}
+
+        <div style={{ marginTop: '1rem', marginBottom: '0.5rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, paddingLeft: '1rem' }}>Account</div>
+        <NavLink to="/settings" style={({ isActive }) => navItemStyle(isActive)}>
+          <Settings size={20} /> Profile & Settings
+        </NavLink>
       </nav>
 
       <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>

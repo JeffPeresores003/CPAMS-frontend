@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import Alert from '../../components/ui/Alert';
 import StatusBadge from '../../components/ui/StatusBadge';
 import EmptyState from '../../components/ui/EmptyState';
 import { TableRowSkeleton } from '../../components/ui/Skeleton';
-import { CalendarClock, MapPin, CreditCard, AlertTriangle } from 'lucide-react';
+import { CalendarClock, MapPin, CreditCard, AlertTriangle, Plus } from 'lucide-react';
 
 const MyReservations = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState({ type: '', message: '' });
@@ -30,7 +32,16 @@ const MyReservations = () => {
 
   return (
     <div>
-      <h1 className="mb-4">My Reservations</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h1 style={{ margin: 0 }}>My Reservations</h1>
+        <button
+          className="btn btn-primary"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          onClick={() => navigate('/my/reservations/add')}
+        >
+          <Plus size={18} /> Add Reservation
+        </button>
+      </div>
       <Alert type={alert.type} message={alert.message} />
 
       {/* Summary Cards — always shown once loading is done */}
@@ -82,9 +93,16 @@ const MyReservations = () => {
         <div className="card" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <CalendarClock size={56} style={{ color: 'var(--text-muted)', margin: '0 auto 1.5rem' }} />
           <h3 style={{ marginBottom: '0.5rem' }}>No Reservations Yet</h3>
-          <p style={{ color: 'var(--text-muted)', maxWidth: 400, margin: '0 auto' }}>
-            Your plot reservations will appear here once a staff member processes your request.
+          <p style={{ color: 'var(--text-muted)', maxWidth: 400, margin: '0 auto 1.5rem' }}>
+            Ready to reserve a plot? Click the button below to get started.
           </p>
+          <button
+            className="btn btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+            onClick={() => navigate('/my/reservations/add')}
+          >
+            <Plus size={16} /> Add Reservation
+          </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -99,6 +117,7 @@ const MyReservations = () => {
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                       <h3 style={{ margin: 0 }}>Reservation #{r.reservation_id}</h3>
+                      <StatusBadge value={r.reservation_status} />
                       <StatusBadge value={r.balance_status} />
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem 2rem' }}>
