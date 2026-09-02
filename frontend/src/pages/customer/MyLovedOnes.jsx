@@ -48,9 +48,9 @@ const MyLovedOnes = () => {
                 ? <tr><td colSpan="5"><EmptyState message="No records found" icon={Heart} /></td></tr>
                 : records.map(r => (
                   <tr key={r.deceased_id}>
-                    <td style={{ fontWeight: 600 }}>{r.deceased_name}</td>
+                    <td style={{ fontWeight: 600 }}>{r.full_name || r.deceased_name}</td>
                     <td>{r.plot_number}</td>
-                    <td>{r.section_name || '—'}</td>
+                    <td>{r.location || r.section_name || '—'}</td>
                     <td>{r.date_of_death ? new Date(r.date_of_death).toLocaleDateString() : '—'}</td>
                     <td>{r.date_of_burial ? new Date(r.date_of_burial).toLocaleDateString() : '—'}</td>
                   </tr>

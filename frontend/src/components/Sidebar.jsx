@@ -2,9 +2,19 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  LayoutDashboard, Users, Map as MapIcon, 
-  CalendarClock, CreditCard, UserMinus, UserPlus,
-  LogOut, FileText, Settings 
+  LayoutDashboard, 
+  Users, 
+  Compass, 
+  CalendarClock, 
+  CreditCard, 
+  UserMinus, 
+  UserPlus,
+  LogOut, 
+  FileText, 
+  Settings,
+  Heart,
+  ShieldAlert,
+  ChevronRight
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -19,146 +29,244 @@ const Sidebar = () => {
   const navItemStyle = (isActive) => ({
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem',
+    justifyContent: 'space-between',
     padding: '0.75rem 1rem',
     borderRadius: 'var(--radius-md)',
     transition: 'var(--transition)',
     textDecoration: 'none',
-    fontSize: '0.95rem',
-    fontWeight: isActive ? 600 : 400,
-    color: isActive ? '#fff' : 'var(--text-muted)',
+    fontSize: '0.9rem',
+    fontWeight: isActive ? 700 : 500,
+    color: isActive ? '#022c22' : 'var(--text-muted)',
     backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-    boxShadow: isActive ? 'var(--shadow-md)' : 'none',
+    boxShadow: isActive ? '0 0 20px rgba(16,185,129,0.3)' : 'none',
   });
 
   return (
     <aside style={{
-      width: '260px',
+      width: '270px',
       height: '100vh',
-      backgroundColor: 'rgba(9, 9, 11, 0.8)', /* Zinc 950 with transparency for glass */
-      backdropFilter: 'blur(20px)',
+      backgroundColor: 'rgba(7, 9, 14, 0.9)',
+      backdropFilter: 'blur(24px)',
       borderRight: '1px solid var(--border-light)',
       display: 'flex',
       flexDirection: 'column',
       position: 'fixed',
       left: 0,
       top: 0,
-      zIndex: 50
+      zIndex: 50,
     }}>
-      <div style={{ 
-        padding: '2rem 1.5rem', 
+      {/* Brand & User Info */}
+      <div style={{
+        padding: '1.75rem 1.5rem',
         borderBottom: '1px solid var(--border-light)',
         position: 'relative',
-        overflow: 'hidden'
+        background: 'linear-gradient(180deg, rgba(16,185,129,0.06) 0%, transparent 100%)',
       }}>
-        {/* Sidebar Header Background Image */}
-        <img 
-          src="https://images.unsplash.com/photo-1542224566-6e85f2e6772f?w=400&auto=format&fit=crop&q=80"
-          alt="Sidebar aesthetic"
-          style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%',
-            objectFit: 'cover',
-            filter: 'brightness(0.3) saturate(0.8)',
-            zIndex: 0
-          }}
-        />
-        {/* Overlay */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          <img
+            src="/img/CPAMS%20logo.png"
+            alt="CPAMS Logo"
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: '1.5px solid rgba(16, 185, 129, 0.5)',
+              boxShadow: '0 0 12px rgba(16, 185, 129, 0.35)',
+            }}
+          />
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.04em', color: '#fff', lineHeight: 1.1 }}>
+              CPAMS
+            </h2>
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 600 }}>
+              Cemetery System
+            </span>
+          </div>
+        </div>
+
+        {/* User Pill */}
         <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, rgba(9,9,11,0.6) 0%, rgba(9,9,11,0.95) 100%)',
-          zIndex: 0
-        }} />
-        
-        {/* Header Content */}
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <h2 style={{ margin: 0, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.75rem', letterSpacing: '-0.05em' }}>
-            <div style={{ padding: '0.5rem', background: 'var(--primary-glow)', borderRadius: 'var(--radius-md)', color: 'var(--primary)' }}>
-              <MapIcon size={24} />
+          padding: '0.75rem 0.9rem',
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          border: '1px solid var(--border-light)',
+          borderRadius: 'var(--radius-md)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text-main)', lineHeight: 1.2 }}>
+              {user?.first_name} {user?.last_name}
             </div>
-            CPAMS
-          </h2>
-          <p style={{ margin: '1rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            {user?.first_name} {user?.last_name}
-            <br/>
-            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '0.05em', fontWeight: 600 }}>{user?.role}</span>
-          </p>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'capitalize' }}>
+              {user?.username}
+            </div>
+          </div>
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+            padding: '0.2rem 0.5rem',
+            borderRadius: 'var(--radius-full)',
+            backgroundColor: user?.role === 'Admin' ? 'rgba(244,63,94,0.15)' : user?.role === 'Staff' ? 'rgba(6,182,212,0.15)' : 'rgba(16,185,129,0.15)',
+            color: user?.role === 'Admin' ? '#fda4af' : user?.role === 'Staff' ? 'var(--accent-cyan)' : 'var(--primary-light)',
+            border: `1px solid ${user?.role === 'Admin' ? 'rgba(244,63,94,0.3)' : user?.role === 'Staff' ? 'rgba(6,182,212,0.3)' : 'rgba(16,185,129,0.3)'}`,
+          }}>
+            {user?.role}
+          </span>
         </div>
       </div>
 
-      <nav style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      {/* Nav Menu */}
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
         <NavLink to="/dashboard" style={({ isActive }) => navItemStyle(isActive)}>
-          <LayoutDashboard size={20} /> Dashboard
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <LayoutDashboard size={18} /> <span>Dashboard</span>
+          </div>
+          <ChevronRight size={14} style={{ opacity: 0.5 }} />
         </NavLink>
 
         {user?.role === 'Admin' && (
           <>
-            <div style={{ marginTop: '1rem', marginBottom: '0.5rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, paddingLeft: '1rem' }}>Admin</div>
+            <div style={{ marginTop: '1.25rem', marginBottom: '0.4rem', fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-dim)', fontWeight: 700, paddingLeft: '0.75rem', letterSpacing: '0.08em' }}>
+              Administration
+            </div>
             <NavLink to="/users" end style={({ isActive }) => navItemStyle(isActive)}>
-              <Users size={20} /> User Management
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Users size={18} /> <span>User Management</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/users/pending" style={({ isActive }) => navItemStyle(isActive)}>
-              <UserMinus size={20} /> Pending Customers
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <ShieldAlert size={18} /> <span>Pending Approvals</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/cemetery" style={({ isActive }) => navItemStyle(isActive)}>
-              <Settings size={20} /> Cemetery Setup
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Settings size={18} /> <span>Cemetery Setup</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/reports" style={({ isActive }) => navItemStyle(isActive)}>
-              <FileText size={20} /> Reports
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <FileText size={18} /> <span>Reports &amp; Analytics</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
           </>
         )}
 
         {user?.role === 'Staff' && (
           <>
-            <div style={{ marginTop: '1rem', marginBottom: '0.5rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, paddingLeft: '1rem' }}>Operations</div>
+            <div style={{ marginTop: '1.25rem', marginBottom: '0.4rem', fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-dim)', fontWeight: 700, paddingLeft: '0.75rem', letterSpacing: '0.08em' }}>
+              Operations
+            </div>
             <NavLink to="/customers/new" style={({ isActive }) => navItemStyle(isActive)}>
-              <UserPlus size={20} /> Profiling
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <UserPlus size={18} /> <span>Walk-In Profiling</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/billing" style={({ isActive }) => navItemStyle(isActive)}>
-              <FileText size={20} /> Billing
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <FileText size={18} /> <span>Billing System</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/reservations" style={({ isActive }) => navItemStyle(isActive)}>
-              <CalendarClock size={20} /> Reservations
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <CalendarClock size={18} /> <span>Reservations</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/payments" style={({ isActive }) => navItemStyle(isActive)}>
-              <CreditCard size={20} /> Payments
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <CreditCard size={18} /> <span>Payments</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/deceased" style={({ isActive }) => navItemStyle(isActive)}>
-              <UserMinus size={20} /> Deceased Records
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Heart size={18} /> <span>Deceased Records</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
           </>
         )}
 
         {user?.role === 'Customer' && (
           <>
-            <div style={{ marginTop: '1rem', marginBottom: '0.5rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, paddingLeft: '1rem' }}>My Account</div>
+            <div style={{ marginTop: '1.25rem', marginBottom: '0.4rem', fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-dim)', fontWeight: 700, paddingLeft: '0.75rem', letterSpacing: '0.08em' }}>
+              My Account
+            </div>
             <NavLink to="/my/reservations" style={({ isActive }) => navItemStyle(isActive)}>
-              <CalendarClock size={20} /> My Reservations
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <CalendarClock size={18} /> <span>My Reservations</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/my/payments" style={({ isActive }) => navItemStyle(isActive)}>
-              <CreditCard size={20} /> My Payments
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <CreditCard size={18} /> <span>My Payments</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
             <NavLink to="/my/deceased" style={({ isActive }) => navItemStyle(isActive)}>
-              <UserMinus size={20} /> My Loved Ones
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Heart size={18} /> <span>My Loved Ones</span>
+              </div>
+              <ChevronRight size={14} style={{ opacity: 0.5 }} />
             </NavLink>
           </>
         )}
 
-        <div style={{ marginTop: '1rem', marginBottom: '0.5rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, paddingLeft: '1rem' }}>Account</div>
+        <div style={{ marginTop: '1.25rem', marginBottom: '0.4rem', fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-dim)', fontWeight: 700, paddingLeft: '0.75rem', letterSpacing: '0.08em' }}>
+          Preferences
+        </div>
         <NavLink to="/settings" style={({ isActive }) => navItemStyle(isActive)}>
-          <Settings size={20} /> Profile & Settings
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Settings size={18} /> <span>Profile &amp; Settings</span>
+          </div>
+          <ChevronRight size={14} style={{ opacity: 0.5 }} />
         </NavLink>
       </nav>
 
-      <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      {/* Logout button */}
+      <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border-light)' }}>
         <button 
           onClick={handleLogout}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.75rem', background: 'transparent', color: 'var(--text-muted)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'all 0.2s' }}
-          onMouseOver={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-          onMouseOut={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent' }}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem',
+            background: 'rgba(244,63,94,0.06)',
+            color: '#fda4af',
+            border: '1px solid rgba(244,63,94,0.2)',
+            borderRadius: 'var(--radius-md)',
+            cursor: 'pointer',
+            transition: 'var(--transition)',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.style.background = 'var(--danger)';
+            e.currentTarget.style.borderColor = 'var(--danger)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.color = '#fda4af';
+            e.currentTarget.style.background = 'rgba(244,63,94,0.06)';
+            e.currentTarget.style.borderColor = 'rgba(244,63,94,0.2)';
+          }}
         >
-          <LogOut size={20} /> Logout
+          <LogOut size={16} /> Log Out
         </button>
       </div>
     </aside>

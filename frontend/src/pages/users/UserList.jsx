@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
-import { UserPlus, Eye } from 'lucide-react';
+import { UserPlus, Eye, Search } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 
 const getAccountCode = (u) => {
@@ -16,6 +16,7 @@ const getAccountCode = (u) => {
 const UserList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showStaffForm, setShowStaffForm] = useState(false);
@@ -72,11 +73,30 @@ const UserList = () => {
     }
   };
 
+  const filteredUsers = users.filter(u => {
+    const q = search.toLowerCase().trim();
+    if (!q) return true;
+    const code = getAccountCode(u).toLowerCase();
+    return (
+      (u.first_name && u.first_name.toLowerCase().includes(q)) ||
+      (u.last_name && u.last_name.toLowerCase().includes(q)) ||
+      (u.username && u.username.toLowerCase().includes(q)) ||
+      (u.email && u.email.toLowerCase().includes(q)) ||
+      (u.phone && u.phone.toLowerCase().includes(q)) ||
+      code.includes(q)
+    );
+  });
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1>User Management</h1>
-        <div className="flex gap-4 items-center">
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
+        <div>
+          <h1>User Management</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '-0.5rem' }}>
+            Manage staff and registered customer accounts across the cemetery system.
+          </p>
+        </div>
+        <div className="flex gap-3 items-center flex-wrap">
           {user.role === 'Admin' && (
             <button className="btn btn-primary" onClick={() => setShowStaffForm(!showStaffForm)}>
               <UserPlus size={18} /> New Staff
@@ -86,7 +106,7 @@ const UserList = () => {
             className="form-control" 
             value={roleFilter} 
             onChange={e => setRoleFilter(e.target.value)}
-            style={{ width: '150px' }}
+            style={{ width: '140px' }}
           >
             <option value="">All Roles</option>
             <option value="Admin">Admin</option>
@@ -97,13 +117,27 @@ const UserList = () => {
             className="form-control" 
             value={statusFilter} 
             onChange={e => setStatusFilter(e.target.value)}
-            style={{ width: '150px' }}
+            style={{ width: '140px' }}
           >
             <option value="">All Statuses</option>
             <option value="Approved">Approved</option>
             <option value="Disabled">Disabled</option>
             <option value="Rejected">Rejected</option>
           </select>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="card" style={{ marginBottom: '1.25rem', padding: '1rem 1.25rem' }}>
+        <div style={{ position: 'relative' }}>
+          <Search size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input
+            className="form-control"
+            style={{ paddingLeft: '2.5rem' }}
+            placeholder="Search by name, username, email, account code (e.g. CUS-2026-0001)..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
       </div>
 
@@ -142,7 +176,7 @@ const UserList = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map(u => (
+              {filteredUsers.map(u => (
                 <tr key={u.user_id}>
                   <td>
                     <span className="badge" style={{ backgroundColor: 'rgba(16,185,129,0.1)', color: 'var(--primary)', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'monospace', letterSpacing: '0.05em', fontWeight: 600 }}>
