@@ -93,7 +93,7 @@ const LandingPage = () => {
       }}>
         {/* Background Image */}
         <img
-          src="public/img/cross.png"
+          src="/img/cross.png"
           alt="Cemetery landscape"
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',

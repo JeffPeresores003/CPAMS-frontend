@@ -54,7 +54,7 @@ const Register = () => {
         minHeight: '100vh',
       }}>
         <img
-          src="public/img/cross.png"
+          src="/img/cross.png"
           alt="Peaceful cemetery landscape"
           style={{
             position: 'absolute', inset: 0,

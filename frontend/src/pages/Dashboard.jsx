@@ -87,7 +87,7 @@ const Dashboard = () => {
       }}>
         {/* Background Image */}
         <img 
-          src="public/img/cross.png" 
+          src="/img/cross.png" 
           alt="Peaceful nature landscape"
           style={{
             position: 'absolute', inset: 0,
