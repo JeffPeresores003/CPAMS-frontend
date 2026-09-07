@@ -66,9 +66,11 @@ const Dashboard = () => {
         api.get('/payments/my'),
         api.get('/deceased/my'),
       ]).then(([resRes, payRes, decRes]) => {
-        setMyReservations(resRes.data || []);
-        setMyPayments(payRes.data || []);
-        setMyDeceased(decRes.data || []);
+        setMyReservations(Array.isArray(resRes.data) ? resRes.data : []);
+        // /payments/my returns { payments: [...], reservations: [...] }
+        const payData = payRes.data;
+        setMyPayments(Array.isArray(payData) ? payData : (payData?.payments || []));
+        setMyDeceased(Array.isArray(decRes.data) ? decRes.data : []);
       }).catch(console.error).finally(() => setCustLoading(false));
     }
   }, [user]);
